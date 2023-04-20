@@ -99,7 +99,7 @@ echo "KEYMAP=us" > /etc/vconsole.conf
 echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
 
 # Install Additional tools
-pacman -S --noconfirm vim wget curl reflector xorg networkmanager efibootmgr dosfstools os-prober mtools linux-lts linux-lts-headers p7zip p7zip-plugins unrar tar rsync pacman-contrib
+pacman -S --noconfirm vim wget curl reflector xorg networkmanager efibootmgr dosfstools os-prober mtools linux-lts linux-lts-headers p7zip p7zip-plugins unrar tar rsync pacman-contrib xdg-user-dirs
 
 # Install Codecs and plugins
 pacman -S --noconfirm a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore gstreamer0.10-plugins exfat-utils fuse-exfat gst-libav libmad libmpeg2 libdvdcss libdvdread libdvdnav gecko-mediaplayer dvd+rw-tools dvdauthor dvgrab
@@ -227,7 +227,8 @@ echo "Mirror selection complete."
 systemctl enable paccache.timer
 systemctl start paccache.timer
 
-
+# Create user directory folders
+xdg-user-dirs-update
 
 EOF
 
