@@ -142,6 +142,10 @@ else
     fi
 fi
 
+wget -c https://raw.githubusercontent.com/henrydenhengst/myarch/main/arch-auto-upgrade.sh
+mv arch-auto-upgrade.sh /usr/local/bin/arch-auto-upgrade.sh
+chmod +x /usr/local/bin/arch-auto-upgrade.sh
+
 # Check if update-script.service file exists with correct content and create it if missing
 UPDATE_SCRIPT_SERVICE="/etc/systemd/system/update-script.service"
 UPDATE_SCRIPT_CONTENT="[Unit]\nDescription=Auto-update script\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/arch-auto-upgrade.sh\nRemainAfterExit=true\n\n[Install]\nWantedBy=multi-user.target\n"
