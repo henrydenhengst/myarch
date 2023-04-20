@@ -142,6 +142,17 @@ else
     fi
 fi
 
+# Check if update-script.service file exists with correct content and create it if missing
+UPDATE_SCRIPT_SERVICE="/etc/systemd/system/update-script.service"
+UPDATE_SCRIPT_CONTENT="[Unit]\nDescription=Auto-update script\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/arch-auto-upgrade.sh\nRemainAfterExit=true\n\n[Install]\nWantedBy=multi-user.target\n"
+if [[ ! -f "$UPDATE_SCRIPT_SERVICE" ]] || ! grep -q "$UPDATE_SCRIPT_CONTENT" "$UPDATE_SCRIPT_SERVICE"; then
+    echo "Creating $UPDATE_SCRIPT_SERVICE file..."
+    echo -e "$UPDATE_SCRIPT_CONTENT" | sudo tee "$UPDATE_SCRIPT_SERVICE" >/dev/null
+    chmod +x /usr/local/bin/arch-auto-upgrade.sh
+else
+    echo "$UPDATE_SCRIPT_SERVICE file already exists with correct content."
+fi
+
 
 EOF
 
