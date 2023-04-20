@@ -196,6 +196,14 @@ else
     echo "$UPDATE_SCRIPT_SERVICE file already exists with correct content."
 fi
 
+# Backup existing mirror list
+cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+
+# Use reflector to select the 10 most recently updated mirrors, sorted by download speed
+reflector --latest 10 --sort rate --save /etc/pacman.d/mirrorlist
+echo "Mirror selection complete."
+
+
 
 EOF
 
