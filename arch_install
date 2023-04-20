@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Install the base system
+pacstrap /mnt base base-devel
+
+# Generate an fstab file
+genfstab -U /mnt >> /mnt/etc/fstab
+
+# Chroot into the newly installed system
+arch-chroot /mnt <<EOF
+
+# Set the hostname
+echo "myhostname" > /etc/hostname
+
+# Set the timezone
+ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+
+# Set the locale
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+# Set the network configuration
+echo "127.0.0.1 localhost" > /etc/hosts
+echo "::1 localhost" >> /etc/hosts
+echo "127.0.1.1 myhostname.localdomain myhostname" >> /etc/hosts
+systemctl enable dhcpcd.service
+
+# Install additional packages
+pacman -S --noconfirm vim
+
+# Install and configure the bootloader
+pacman -S --noconfirm grub
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+
+EOF
+
+# Reboot the system
+reboot
