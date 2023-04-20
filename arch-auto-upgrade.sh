@@ -1,6 +1,11 @@
 #!/bin/bash
 #
-# THIS SCRIPT IS DEPENDING UPON: install_systemd_cron.sh
+# >>> THIS SCRIPT IS DEPENDING UPON: install_systemd_cron.sh <<<
+#
+# This script MUST be located here 
+### /usr/local/bin/arch-auto-upgrade.sh
+# in order to work properly with 
+### install_systemd_cron.sh
 #
 # Prepare before running this script
 #
