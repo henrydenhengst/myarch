@@ -58,6 +58,19 @@ else
     echo "$(date +"%Y-%m-%d %T"): Snap is already installed." >> $SNAP_LOG
 fi
 
+# Make sure appimageupdatetool is installed
+if ! command -v appimageupdatetool &> /dev/null
+then
+    echo "$(date +"%Y-%m-%d %T"): appimageupdatetool is not installed. Installing..." >> /var/log/appimage.log
+    # Install dependencies
+    sudo pacman -S curl jq --noconfirm >> /var/log/appimage.log 2>&1
+    # Download and install appimageupdatetool
+    curl -LO https://github.com/AppImage/appimageupdatetool/releases/download/continuous/appimageupdatetool-x86_64.AppImage >> /var/log/appimage.log 2>&1
+    chmod +x appimageupdatetool-x86_64.AppImage >> /var/log/appimage.log 2>&1
+    sudo mv appimageupdatetool-x86_64.AppImage /usr/local/bin/appimageupdatetool >> /var/log/appimage.log 2>&1
+else
+    echo "$(date +"%Y-%m-%d %T"): appimageupdatetool is already installed." >> /var/log/appimage.log
+fi
 
 # Refresh pacman keys and upgrade the system
 echo "Refreshing pacman keys and upgrading the system..."
