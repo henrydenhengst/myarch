@@ -5,6 +5,11 @@
 # Note that you need to replace /path/to/update-script in the UPDATE_SCRIPT_CONTENT variable with the actual path to your update script. 
 # Also, make sure to make the update script executable (chmod +x /usr/local/bin/arch-auto-upgrade.sh) so that systemd-cron can execute it.
 #
+# Check if script is run as root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root." 
+   exit 1
+fi
 
 # Check if systemd-cron is installed and enable/start the service
 if ! pacman -Qi systemd-cron >/dev/null 2>&1; then
@@ -31,6 +36,7 @@ UPDATE_SCRIPT_CONTENT="[Unit]\nDescription=Auto-update script\n\n[Service]\nType
 if [[ ! -f "$UPDATE_SCRIPT_SERVICE" ]] || ! grep -q "$UPDATE_SCRIPT_CONTENT" "$UPDATE_SCRIPT_SERVICE"; then
     echo "Creating $UPDATE_SCRIPT_SERVICE file..."
     echo -e "$UPDATE_SCRIPT_CONTENT" | sudo tee "$UPDATE_SCRIPT_SERVICE" >/dev/null
+    chmod +x /usr/local/bin/arch-auto-upgrade.sh
 else
     echo "$UPDATE_SCRIPT_SERVICE file already exists with correct content."
 fi
