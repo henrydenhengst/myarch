@@ -99,7 +99,7 @@ echo "KEYMAP=us" > /etc/vconsole.conf
 echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
 
 # Install additional packages
-pacman -S --noconfirm vim wget curl 
+pacman -S --noconfirm vim wget curl reflector
 
 # Install and configure GRUB bootloader
 pacman -S grub efibootmgr
