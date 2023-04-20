@@ -34,6 +34,15 @@ pacman -S --noconfirm grub
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
+pacman -S --noconfirm lightdm
+systemctl enable lightdm.service
+
+pacman -S --noconfirm gnome
+systemctl enable gdm.service
+
+useradd -m -g users -s /bin/bash username
+passwd username
+
 EOF
 
 # Reboot the system
