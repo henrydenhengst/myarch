@@ -13,7 +13,7 @@ arch-chroot /mnt <<EOF
 echo "myhostname" > /etc/hostname
 
 # Set the timezone
-ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
 
 # Set the locale
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -33,3 +33,72 @@ INSTALL_DISK=$(lsblk -dpno NAME $(mount | awk '$3 == "/" {print $1}') | head -n1
 ALL_DISKS=$(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$")
 
 # Partition and format all disks except the installation disk
+for DISK in $ALL_DISKS
+do
+  parted -s /dev/$DISK mklabel gpt
+  parted -s /dev/$DISK mkpart primary btrfs 0% 100%
+  mkfs.btrfs /dev/${DISK}1
+done
+
+# Mount all BTRFS partitions
+mkdir /mnt/btrfs
+mount -t btrfs $(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$" | awk '{print "/dev/"$1"1"}') /mnt/btrfs
+
+# Set up basic system configuration
+echo "myhostname" > /etc/hostname
+ln -sf /usr/share/zoneinfo/Region/City /etc/localtime
+sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo "KEYMAP=us" > /etc/vconsole.conf
+echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
+
+# Install and configure GRUB bootloader
+pacman -S grub efibootmgr
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=arch_grub --recheck
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Install and configure additional packages, such as display manager and desktop environment
+pacman -S gnome
+systemctl enable gdm.service
+
+# Install a consistent dark theme for GRUB, GDM, and GNOME
+
+# Set variables
+THEME_NAME="Sweet-Dark"
+THEME_URL="https://github.com/EliverLara/Sweet/releases/download/v2.0.0/Sweet-Dark.tar.xz"
+THEME_DIR="/usr/share/themes"
+
+# Install dependencies
+sudo pacman -S --noconfirm wget tar
+
+# Download and extract theme files
+cd /tmp
+wget $THEME_URL
+sudo tar -xf Sweet-Dark.tar.xz -C $THEME_DIR
+
+# Configure GRUB theme
+sudo mkdir -p /boot/grub/themes/$THEME_NAME
+sudo cp -r $THEME_DIR/$THEME_NAME/grub/* /boot/grub/themes/$THEME_NAME/
+sudo sed -i "s/GRUB_THEME=.*/GRUB_THEME=\"\/boot\/grub\/themes\/$THEME_NAME\/theme.txt\"/g" /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+# Configure GDM theme
+sudo cp -r $THEME_DIR/$THEME_NAME/gnome-shell/* /usr/share/gnome-shell/theme/
+sudo sed -i "s/^icon-theme-name.*/icon-theme-name=$THEME_NAME/g" /usr/share/gnome-shell/theme/gdm3.css
+
+# Configure GNOME theme
+gsettings set org.gnome.desktop.interface gtk-theme $THEME_NAME
+gsettings set org.gnome.desktop.wm.preferences theme $THEME_NAME
+gsettings set org.gnome.desktop.interface icon-theme $THEME_NAME
+
+echo "Done!"
+
+# Create a new user account
+# ...
+
+EOF
+
+# Reboot the system
+umount -R /mnt
+reboot
