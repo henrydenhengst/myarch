@@ -99,13 +99,16 @@ echo "KEYMAP=us" > /etc/vconsole.conf
 echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
 
 # Install Additional tools
-pacman -S --noconfirm vim wget curl reflector xorg networkmanager efibootmgr dosfstools os-prober mtools linux-lts linux-lts-headers p7zip p7zip-plugins unrar tar rsync pacman-contrib xdg-user-dirs
+pacman -S --noconfirm vim wget curl reflector xorg networkmanager efibootmgr dosfstools os-prober mtools linux-lts linux-lts-headers p7zip p7zip-plugins unrar tar rsync pacman-contrib xdg-user-dirs ufw
 
 # Install Codecs and plugins
 pacman -S --noconfirm a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore gstreamer0.10-plugins exfat-utils fuse-exfat gst-libav libmad libmpeg2 libdvdcss libdvdread libdvdnav gecko-mediaplayer dvd+rw-tools dvdauthor dvgrab
 
-Installing Productive software
-pacman -S --noconfirm libreoffice thunderbird firefox geany vlc
+# Installing Productive software
+pacman -S --noconfirm libreoffice-fresh thunderbird firefox geany vlc
+
+# Installing fonts, spell-checking dictionaries, java, and others...
+pacman -S --noconfirm enchant mythes-en ttf-liberation hunspell-en_US ttf-bitstream-vera pkgstats adobe-source-sans-pro-fonts gst-plugins-good ttf-droid ttf-dejavu aspell-en icedtea-web gst-libav ttf-ubuntu-font-family ttf-anonymous-pro jre8-openjdk languagetool libmythes 
 
 # Enable NetworkManager
 systemctl enable NetworkManager.service
@@ -229,6 +232,9 @@ systemctl start paccache.timer
 
 # Create user directory folders
 xdg-user-dirs-update
+
+# Enable Firewall
+ufw enable
 
 EOF
 
