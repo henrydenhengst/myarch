@@ -110,6 +110,19 @@ passwd "$username"
 usermod -aG sudo "$username"
 echo "User account created successfully"
 
+# Define a list of packages that contain drivers
+driver_packages=("linux" "linux-firmware" "nvidia" "amd-ucode")
+
+# Loop through each package and check if it is installed
+for package in "${driver_packages[@]}"
+do
+  if ! pacman -Qs $package > /dev/null ; then
+    echo "Package $package is not installed, installing now..."
+    sudo pacman -S $package --noconfirm
+  fi
+done
+echo "All required drivers are installed."
+
 
 EOF
 
