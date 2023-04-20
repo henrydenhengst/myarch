@@ -26,9 +26,6 @@ echo "::1 localhost" >> /etc/hosts
 echo "127.0.1.1 myhostname.localdomain myhostname" >> /etc/hosts
 systemctl enable dhcpcd.service
 
-# Install additional packages
-pacman -S --noconfirm vim
-
 # Retrieve the name of the installation disk
 INSTALL_DISK=$(lsblk -dpno NAME $(mount | awk '$3 == "/" {print $1}') | head -n1)
 
@@ -36,43 +33,3 @@ INSTALL_DISK=$(lsblk -dpno NAME $(mount | awk '$3 == "/" {print $1}') | head -n1
 ALL_DISKS=$(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$")
 
 # Partition and format all disks except the installation disk
-for DISK in $ALL_DISKS
-do
-  parted -s /dev/$DISK mklabel gpt
-  parted -s /dev/$DISK mkpart primary btrfs 0% 100%
-  mkfs.btrfs /dev/${DISK}1
-done
-
-# Mount all BTRFS partitions
-mkdir /mnt/btrfs
-mount -t btrfs $(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$" | awk '{print "/dev/"$1"1"}') /mnt/btrfs
-
-# Install Arch Linux base system
-pacstrap /mnt base
-
-# Generate fstab file
-genfstab -U /mnt >> /mnt/etc/fstab
-
-# Set up basic system configuration
-arch-chroot /mnt <<EOF
-echo "hostname" > /etc/hostname
-ln -sf /usr/share/zoneinfo/Region/City /etc/localtime
-sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
-locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
-echo "KEYMAP=us" > /etc/vconsole.conf
-echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
-EOF
-
-# Install and configure GRUB bootloader
-pacstrap /mnt grub efibootmgr
-arch-chroot /mnt <<EOF
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=arch_grub --recheck
-grub-mkconfig -o /boot/grub/grub.cfg
-EOF
-
-# Install and configure additional packages, such as display manager and desktop environment
-pacstrap /mnt gnome
-systemctl enable gnome.service
-
-# Create a new
