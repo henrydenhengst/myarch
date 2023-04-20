@@ -99,13 +99,13 @@ echo "KEYMAP=us" > /etc/vconsole.conf
 echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
 
 # Install Additional tools
-pacman -S --noconfirm vim wget curl reflector xorg networkmanager efibootmgr dosfstools os-prober mtools linux-lts linux-lts-headers vlc
+pacman -S --noconfirm vim wget curl reflector xorg networkmanager efibootmgr dosfstools os-prober mtools linux-lts linux-lts-headers p7zip p7zip-plugins unrar tar rsync
 
 # Install Codecs and plugins
 pacman -S --noconfirm a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore gstreamer0.10-plugins
 
 Installing Productive software
-pacman -S --noconfirm libreoffice thunderbird firefox geany 
+pacman -S --noconfirm libreoffice thunderbird firefox geany vlc
 
 # Enable NetworkManager
 systemctl enable NetworkManager.service
