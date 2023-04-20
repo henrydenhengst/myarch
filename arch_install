@@ -46,7 +46,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Install the base system
-pacstrap /mnt base base-devel
+pacstrap /mnt base base-devel linux linux-firmware
 
 # Generate an fstab file
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -104,6 +104,9 @@ pacman -S --noconfirm vim wget curl reflector xorg networkmanager
 # Enable NetworkManager
 systemctl enable NetworkManager.service
 systemctl start NetworkManager.service
+
+# Enable Network Time Protocols 
+timedatectl set-ntp true
 
 # Install and configure GRUB bootloader
 pacman -S grub efibootmgr
