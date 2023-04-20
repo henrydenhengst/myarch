@@ -123,6 +123,25 @@ do
 done
 echo "All required drivers are installed."
 
+# Check if systemd-cron is installed and enable/start the service
+if ! pacman -Qi systemd-cron >/dev/null 2>&1; then
+    echo "systemd-cron is not installed. Installing..."
+    sudo pacman -S systemd-cron
+    echo "Enabling and starting systemd-cron service..."
+    sudo systemctl enable systemd-cron.service
+    sudo systemctl start systemd-cron.service
+else
+    echo "systemd-cron is already installed."
+    if ! systemctl is-enabled --quiet systemd-cron.service; then
+        echo "Enabling systemd-cron service..."
+        sudo systemctl enable systemd-cron.service
+    fi
+    if ! systemctl is-active --quiet systemd-cron.service; then
+        echo "Starting systemd-cron service..."
+        sudo systemctl start systemd-cron.service
+    fi
+fi
+
 
 EOF
 
