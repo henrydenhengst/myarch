@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# After running this script is is advised to run as a crontab: arch-auto-upgrade.sh
+#
 
 # Check if systemd-cron is installed and enable/start the service
 if ! pacman -Qi systemd-cron >/dev/null 2>&1; then
