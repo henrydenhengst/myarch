@@ -33,6 +33,17 @@ if ! ping -q -c 1 -W 1 google.com > /dev/null; then
     exit 1
 fi
 
+# Check if UEFI is enabled
+if [ ! -d "/sys/firmware/efi/efivars" ]; then
+    echo "Error: UEFI is not enabled on this system."
+    exit 1
+fi
+
+# Check if script is run as root
+if [[ $EUID -ne 0 ]]; then
+   echo "Error: This script must be run as root." 
+   exit 1
+fi
 
 # Install the base system
 pacstrap /mnt base base-devel
