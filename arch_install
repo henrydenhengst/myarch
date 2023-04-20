@@ -107,6 +107,7 @@ systemctl start NetworkManager.service
 
 # Enable Network Time Protocols 
 timedatectl set-ntp true
+hwclock --systohc
 
 # Install and configure GRUB bootloader
 pacman -S grub efibootmgr
