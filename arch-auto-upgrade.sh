@@ -19,6 +19,7 @@ PACMAN_LOG="/var/log/pacman.log"
 FLATPAK_LOG="/var/log/flatpak.log"
 SNAP_LOG="/var/log/snap.log"
 APPIMAGE_LOG="/var/log/appimage.log"
+NIX_LOG="/var/log/nix.log"
 UPDATE_LOG="/var/log/update-script.log"
 
 # Run updates
@@ -66,6 +67,20 @@ then
 else
     echo "$(date +"%Y-%m-%d %T"): appimageupdatetool is already installed." >> $APPIMAGE_LOG
 fi
+
+# Make sure Nix is installed
+if ! command -v nix &> /dev/null
+then
+    echo "$(date +"%Y-%m-%d %T"): Nix is not installed. Installing..." >> $NIX_LOG
+    sh <(curl -L https://nixos.org/nix/install) --daemon >> $NIX_LOG
+else
+    echo "$(date +"%Y-%m-%d %T"): Nix is already installed." >> $NIX_LOG
+fi
+
+# Update and upgrade Nix packages
+echo "Updating Nix packages..."
+nix-channel --update
+nix-env -u
 
 # Refresh pacman keys and upgrade the system
 echo "Refreshing pacman keys and upgrading the system..."
