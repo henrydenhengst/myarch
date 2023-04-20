@@ -150,6 +150,12 @@ gsettings set org.gnome.desktop.interface icon-theme $THEME_NAME
 
 echo "Done!"
 
+# Install An AUR Helper
+pacman -S base-devel git --needed 
+cd paru
+makepkg -si
+cd ~
+
 # User account creation
 read -p "Enter the username for the new user: " username
 useradd -m -s /bin/bash "$username"
