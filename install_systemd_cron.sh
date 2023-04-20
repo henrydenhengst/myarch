@@ -3,7 +3,7 @@
 # After running this script is is advised to run as a crontab: arch-auto-upgrade.sh
 #
 # Note that you need to replace /path/to/update-script in the UPDATE_SCRIPT_CONTENT variable with the actual path to your update script. 
-# Also, make sure to make the update script executable (chmod +x /path/to/update-script) so that systemd-cron can execute it.
+# Also, make sure to make the update script executable (chmod +x /usr/local/bin/arch-auto-upgrade.sh) so that systemd-cron can execute it.
 #
 
 # Check if systemd-cron is installed and enable/start the service
@@ -27,7 +27,7 @@ fi
 
 # Check if update-script.service file exists with correct content and create it if missing
 UPDATE_SCRIPT_SERVICE="/etc/systemd/system/update-script.service"
-UPDATE_SCRIPT_CONTENT="[Unit]\nDescription=Auto-update script\n\n[Service]\nType=oneshot\nExecStart=/path/to/update-script\nRemainAfterExit=true\n\n[Install]\nWantedBy=multi-user.target\n"
+UPDATE_SCRIPT_CONTENT="[Unit]\nDescription=Auto-update script\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/arch-auto-upgrade.sh\nRemainAfterExit=true\n\n[Install]\nWantedBy=multi-user.target\n"
 if [[ ! -f "$UPDATE_SCRIPT_SERVICE" ]] || ! grep -q "$UPDATE_SCRIPT_CONTENT" "$UPDATE_SCRIPT_SERVICE"; then
     echo "Creating $UPDATE_SCRIPT_SERVICE file..."
     echo -e "$UPDATE_SCRIPT_CONTENT" | sudo tee "$UPDATE_SCRIPT_SERVICE" >/dev/null
