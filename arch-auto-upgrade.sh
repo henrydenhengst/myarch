@@ -37,6 +37,28 @@ sudo /path/to/appimageupdatetool -ai >> "$APPIMAGE_LOG" 2>&1
 # Log completion message
 echo "Auto-update script completed successfully at $(date)" >> "$UPDATE_LOG"
 
+#!/bin/bash
+
+# Make sure Flatpak and Snap are installed
+if ! command -v flatpak &> /dev/null
+then
+    echo "$(date +"%Y-%m-%d %T"): Flatpak is not installed. Installing..." >> $FLATPAK_LOG
+    sudo pacman -S flatpak --noconfirm >> $FLATPAK_LOG
+    flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo >> $FLATPAK_LOG
+else
+    echo "$(date +"%Y-%m-%d %T"): Flatpak is already installed." >> $FLATPAK_LOG
+fi
+
+if ! command -v snap &> /dev/null
+then
+    echo "$(date +"%Y-%m-%d %T"): Snap is not installed. Installing..." >> $SNAP_LOG
+    sudo pacman -S snapd --noconfirm >> $SNAP_LOG
+    sudo systemctl enable --now snapd.socket >> $SNAP_LOG
+else
+    echo "$(date +"%Y-%m-%d %T"): Snap is already installed." >> $SNAP_LOG
+fi
+
+
 # Refresh pacman keys and upgrade the system
 echo "Refreshing pacman keys and upgrading the system..."
 sudo pacman-key --refresh-keys
