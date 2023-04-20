@@ -99,7 +99,10 @@ echo "KEYMAP=us" > /etc/vconsole.conf
 echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
 
 # Install additional packages
-pacman -S --noconfirm vim wget curl reflector xorg networkmanager efibootmgr dosfstools os-prober mtools linux-lts linux-lts-headers
+pacman -S --noconfirm vim wget curl reflector xorg networkmanager efibootmgr dosfstools os-prober mtools linux-lts linux-lts-headers vlc
+
+# Install Codecs and plugins
+pacman -S a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore gstreamer0.10-plugins
 
 # Enable NetworkManager
 systemctl enable NetworkManager.service
