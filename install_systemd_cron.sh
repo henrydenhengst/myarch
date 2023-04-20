@@ -2,6 +2,9 @@
 #
 # After running this script is is advised to run as a crontab: arch-auto-upgrade.sh
 #
+# Note that you need to replace /path/to/update-script in the UPDATE_SCRIPT_CONTENT variable with the actual path to your update script. 
+# Also, make sure to make the update script executable (chmod +x /path/to/update-script) so that systemd-cron can execute it.
+#
 
 # Check if systemd-cron is installed and enable/start the service
 if ! pacman -Qi systemd-cron >/dev/null 2>&1; then
