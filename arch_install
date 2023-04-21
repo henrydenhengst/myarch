@@ -28,6 +28,8 @@
 #========================================================================================
 set -e
 
+# CHECK !!!
+
 # Check for internet connectivity
 if ! ping -q -c 1 -W 1 google.com > /dev/null; then
     echo "Error: No internet connection detected. Please connect to a network and try again."
@@ -45,6 +47,28 @@ if [[ $EUID -ne 0 ]]; then
    echo "Error: This script must be run as root." 
    exit 1
 fi
+
+# disk !!!
+
+# Retrieve the name of the installation disk
+INSTALL_DISK=$(lsblk -dpno NAME $(mount | awk '$3 == "/" {print $1}') | head -n1)
+
+# List available disks and retrieve the names of all disks except the installation disk
+ALL_DISKS=$(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$")
+
+# Partition and format all disks except the installation disk
+for DISK in $ALL_DISKS
+do
+  parted -s /dev/$DISK mklabel gpt
+  parted -s /dev/$DISK mkpart primary btrfs 0% 100%
+  mkfs.btrfs /dev/${DISK}1
+done
+
+# Mount all BTRFS partitions
+mkdir /mnt/btrfs
+mount -t btrfs $(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$" | awk '{print "/dev/"$1"1"}') /mnt/btrfs
+
+# INSTALL !!!
 
 # Install the base system
 pacstrap /mnt base base-devel linux linux-firmware
@@ -71,24 +95,6 @@ echo "127.0.0.1 localhost" > /etc/hosts
 echo "::1 localhost" >> /etc/hosts
 echo "127.0.1.1 myhostname.localdomain myhostname" >> /etc/hosts
 systemctl enable dhcpcd.service
-
-# Retrieve the name of the installation disk
-INSTALL_DISK=$(lsblk -dpno NAME $(mount | awk '$3 == "/" {print $1}') | head -n1)
-
-# List available disks and retrieve the names of all disks except the installation disk
-ALL_DISKS=$(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$")
-
-# Partition and format all disks except the installation disk
-for DISK in $ALL_DISKS
-do
-  parted -s /dev/$DISK mklabel gpt
-  parted -s /dev/$DISK mkpart primary btrfs 0% 100%
-  mkfs.btrfs /dev/${DISK}1
-done
-
-# Mount all BTRFS partitions
-mkdir /mnt/btrfs
-mount -t btrfs $(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$" | awk '{print "/dev/"$1"1"}') /mnt/btrfs
 
 # Set up basic system configuration
 echo "myhostname" > /etc/hostname
