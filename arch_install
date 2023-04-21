@@ -111,23 +111,23 @@ pacman -S --noconfirm libreoffice-fresh thunderbird firefox geany vlc
 pacman -S --noconfirm enchant mythes-en ttf-liberation hunspell-en_US ttf-bitstream-vera pkgstats adobe-source-sans-pro-fonts gst-plugins-good ttf-droid ttf-dejavu aspell-en icedtea-web gst-libav ttf-ubuntu-font-family ttf-anonymous-pro jre8-openjdk languagetool libmythes 
 
 # Install CUPS and related packages
-sudo pacman -S cups cups-filters ghostscript gutenprint foomatic-db foomatic-db-ppds
+pacman -S cups cups-filters ghostscript gutenprint foomatic-db foomatic-db-ppds
 
 # Enable and start the CUPS service
-sudo systemctl enable cups.service
-sudo systemctl start cups.service
+systemctl enable cups.service
+systemctl start cups.service
 
 # Add user to the lpadmin group to allow administration of printers
-sudo usermod -aG lpadmin $(whoami)
+usermod -aG lpadmin $(whoami)
 
 # Install printer drivers for HP, Brother, Canon and Epson printers
-sudo pacman -S hplip brother-printer-driver laserjet cpd220cnc
+pacman -S hplip brother-printer-driver laserjet cpd220cnc
 
 # Install CUPS-PDF printer driver for printing to PDF
-sudo pacman -S cups-pdf
+pacman -S cups-pdf
 
 # Restart the CUPS service to apply changes
-sudo systemctl restart cups.service
+systemctl restart cups.service
 
 # Enable NetworkManager
 systemctl enable NetworkManager.service
@@ -154,22 +154,22 @@ THEME_URL="https://github.com/EliverLara/Sweet/releases/download/v2.0.0/Sweet-Da
 THEME_DIR="/usr/share/themes"
 
 # Install dependencies
-sudo pacman -S --noconfirm wget tar
+pacman -S --noconfirm wget tar
 
 # Download and extract theme files
 cd /tmp
 wget $THEME_URL
-sudo tar -xf Sweet-Dark.tar.xz -C $THEME_DIR
+tar -xf Sweet-Dark.tar.xz -C $THEME_DIR
 
 # Configure GRUB theme
-sudo mkdir -p /boot/grub/themes/$THEME_NAME
-sudo cp -r $THEME_DIR/$THEME_NAME/grub/* /boot/grub/themes/$THEME_NAME/
-sudo sed -i "s/GRUB_THEME=.*/GRUB_THEME=\"\/boot\/grub\/themes\/$THEME_NAME\/theme.txt\"/g" /etc/default/grub
-sudo grub-mkconfig -o /boot/grub/grub.cfg
+mkdir -p /boot/grub/themes/$THEME_NAME
+cp -r $THEME_DIR/$THEME_NAME/grub/* /boot/grub/themes/$THEME_NAME/
+sed -i "s/GRUB_THEME=.*/GRUB_THEME=\"\/boot\/grub\/themes\/$THEME_NAME\/theme.txt\"/g" /etc/default/grub
+grub-mkconfig -o /boot/grub/grub.cfg
 
 # Configure GDM theme
-sudo cp -r $THEME_DIR/$THEME_NAME/gnome-shell/* /usr/share/gnome-shell/theme/
-sudo sed -i "s/^icon-theme-name.*/icon-theme-name=$THEME_NAME/g" /usr/share/gnome-shell/theme/gdm3.css
+cp -r $THEME_DIR/$THEME_NAME/gnome-shell/* /usr/share/gnome-shell/theme/
+sed -i "s/^icon-theme-name.*/icon-theme-name=$THEME_NAME/g" /usr/share/gnome-shell/theme/gdm3.css
 
 # Configure GNOME theme
 gsettings set org.gnome.desktop.interface gtk-theme $THEME_NAME
@@ -199,7 +199,7 @@ for package in "${driver_packages[@]}"
 do
   if ! pacman -Qs $package > /dev/null ; then
     echo "Package $package is not installed, installing now..."
-    sudo pacman -S $package --noconfirm
+    pacman -S $package --noconfirm
   fi
 done
 echo "All required drivers are installed."
@@ -207,19 +207,19 @@ echo "All required drivers are installed."
 # Check if systemd-cron is installed and enable/start the service
 if ! pacman -Qi systemd-cron >/dev/null 2>&1; then
     echo "systemd-cron is not installed. Installing..."
-    sudo pacman -S systemd-cron
+    pacman -S systemd-cron
     echo "Enabling and starting systemd-cron service..."
-    sudo systemctl enable systemd-cron.service
-    sudo systemctl start systemd-cron.service
+    systemctl enable systemd-cron.service
+    systemctl start systemd-cron.service
 else
     echo "systemd-cron is already installed."
     if ! systemctl is-enabled --quiet systemd-cron.service; then
         echo "Enabling systemd-cron service..."
-        sudo systemctl enable systemd-cron.service
+        systemctl enable systemd-cron.service
     fi
     if ! systemctl is-active --quiet systemd-cron.service; then
         echo "Starting systemd-cron service..."
-        sudo systemctl start systemd-cron.service
+        systemctl start systemd-cron.service
     fi
 fi
 
@@ -232,7 +232,7 @@ UPDATE_SCRIPT_SERVICE="/etc/systemd/system/update-script.service"
 UPDATE_SCRIPT_CONTENT="[Unit]\nDescription=Auto-update script\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/arch-auto-upgrade.sh\nRemainAfterExit=true\n\n[Install]\nWantedBy=multi-user.target\n"
 if [[ ! -f "$UPDATE_SCRIPT_SERVICE" ]] || ! grep -q "$UPDATE_SCRIPT_CONTENT" "$UPDATE_SCRIPT_SERVICE"; then
     echo "Creating $UPDATE_SCRIPT_SERVICE file..."
-    echo -e "$UPDATE_SCRIPT_CONTENT" | sudo tee "$UPDATE_SCRIPT_SERVICE" >/dev/null
+    echo -e "$UPDATE_SCRIPT_CONTENT" | tee "$UPDATE_SCRIPT_SERVICE" >/dev/null
     chmod +x /usr/local/bin/arch-auto-upgrade.sh
 else
     echo "$UPDATE_SCRIPT_SERVICE file already exists with correct content."
@@ -246,7 +246,7 @@ reflector --verbose --latest 5 --sort rate --save /etc/pacman.d/mirrorlist \
 --country Netherlands --country Belgium --country Germany --country UK
 
 # Configure reflector to update mirrorlist weekly
-sudo tee /etc/systemd/system/mirrorlist-update.timer <<EOF
+tee /etc/systemd/system/mirrorlist-update.timer <<EOF
 [Unit]
 Description=Weekly update of pacman mirrorlist
 
@@ -259,17 +259,17 @@ Persistent=true
 WantedBy=timers.target
 EOF
 
-sudo tee /etc/systemd/system/mirrorlist-update.service <<EOF
+tee /etc/systemd/system/mirrorlist-update.service <<EOF
 [Unit]
 Description=Update pacman mirrorlist
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c "sudo reflector --verbose --latest 5 --sort rate --save /etc/pacman.d/mirrorlist --country Netherlands --country Belgium --country Germany --country UK"
+ExecStart=/bin/bash -c "reflector --verbose --latest 5 --sort rate --save /etc/pacman.d/mirrorlist --country Netherlands --country Belgium --country Germany --country UK"
 EOF
 
-sudo systemctl daemon-reload
-sudo systemctl enable --now mirrorlist-update.timer
+systemctl daemon-reload
+systemctl enable --now mirrorlist-update.timer
 
 echo "Mirror selection complete."
 
