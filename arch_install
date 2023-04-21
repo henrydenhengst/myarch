@@ -61,9 +61,9 @@ echo "myhostname" > /etc/hostname
 ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
 
 # Set the locale
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+echo "nl_NL.UTF-8 UTF-8" > /etc/locale.gen
 locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo "LANG=nl_NL.UTF-8" > /etc/locale.conf
 
 # Set the network configuration
 echo "127.0.0.1 localhost" > /etc/hosts
