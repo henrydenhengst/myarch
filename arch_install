@@ -12,14 +12,14 @@
 #
 #          FILE:  arch_install
 #
-#         USAGE:  curl -sL https://bit.ly/2F3CATp | bash
+#         USAGE:  curl -sL https://rb.gy/sb0x8 | bash
 #
 #   DESCRIPTION:  Arch Linux Unattended Install
 #
 #       OPTIONS:  ---
-#  REQUIREMENTS:  ---
+#  REQUIREMENTS:  a intel / amd 64 computer arch-linux ISO
 #          BUGS:  ---
-#         NOTES:  ---
+#         NOTES:  Boot latest Arch-Linux ISO and run script, done!
 #        AUTHOR:  Henry den Hengst , henrydenhengst@gmail.com
 #       COMPANY:  private
 #       VERSION:  0.01
