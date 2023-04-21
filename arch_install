@@ -16,12 +16,12 @@
 #
 #   DESCRIPTION:  Arch Linux Unattended Install
 #
-#       OPTIONS:  ---
-#  REQUIREMENTS:  an intel / amd 64 computer - >4 GB Memory - >20 GB HDD - Arch-linux ISO
+#       OPTIONS:  Edit the script to your needs.
+#  REQUIREMENTS:  An intel / amd 64 computer - >4 GB Memory - >20 GB HDD - Arch-linux ISO
 #          BUGS:  ---
 #         NOTES:  Boot latest Arch-Linux ISO and run script, done!
 #        AUTHOR:  Henry den Hengst , henrydenhengst@gmail.com
-#       COMPANY:  private
+#       COMPANY:  QualityReloaded
 #       VERSION:  0.01
 #       CREATED:  20-04-2023
 #      REVISION:  ---
