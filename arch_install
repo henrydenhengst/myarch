@@ -245,6 +245,32 @@ cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
 reflector --verbose --latest 5 --sort rate --save /etc/pacman.d/mirrorlist \
 --country Netherlands --country Belgium --country Germany --country UK
 
+# Configure reflector to update mirrorlist weekly
+sudo tee /etc/systemd/system/mirrorlist-update.timer <<EOF
+[Unit]
+Description=Weekly update of pacman mirrorlist
+
+[Timer]
+OnCalendar=weekly
+AccuracySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+sudo tee /etc/systemd/system/mirrorlist-update.service <<EOF
+[Unit]
+Description=Update pacman mirrorlist
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "sudo reflector --verbose --latest 5 --sort rate --save /etc/pacman.d/mirrorlist --country Netherlands --country Belgium --country Germany --country UK"
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now mirrorlist-update.timer
+
 echo "Mirror selection complete."
 
 # Automatic cleaning the package cache by activating the paccache timer
