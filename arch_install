@@ -12,7 +12,7 @@
 #
 #          FILE:  arch_install
 #
-#         USAGE:  curl -s https://rb.gy/sb0x8 | bash
+#         USAGE:  curl -s https://raw.githubusercontent.com/henrydenhengst/myarch/main/arch_install | bash
 #
 #   DESCRIPTION:  Arch Linux Unattended Install
 #
