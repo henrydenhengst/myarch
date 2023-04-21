@@ -48,7 +48,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-# disk !!!
+# DISK !!!
 
 # Retrieve the name of the installation disk
 INSTALL_DISK=$(lsblk -dpno NAME $(mount | awk '$3 == "/" {print $1}') | head -n1)
