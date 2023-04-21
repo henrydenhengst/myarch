@@ -242,7 +242,9 @@ fi
 cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
 
 # Use reflector to select the 10 most recently updated mirrors, sorted by download speed
-reflector --latest 10 --sort rate --save /etc/pacman.d/mirrorlist
+reflector --verbose --latest 5 --sort rate --save /etc/pacman.d/mirrorlist \
+--country Netherlands --country Belgium --country Germany --country UK
+
 echo "Mirror selection complete."
 
 # Automatic cleaning the package cache by activating the paccache timer
