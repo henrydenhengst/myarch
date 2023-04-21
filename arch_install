@@ -42,6 +42,26 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# DISK !!!
+
+# Retrieve the name of the installation disk
+INSTALL_DISK=$(lsblk -dpno NAME $(mount | awk '$3 == "/" {print $1}') | head -n1)
+
+# List available disks and retrieve the names of all disks except the installation disk
+ALL_DISKS=$(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$")
+
+# Partition and format all disks except the installation disk
+for DISK in $ALL_DISKS
+do
+  parted -s /dev/$DISK mklabel gpt
+  parted -s /dev/$DISK mkpart primary btrfs 0% 100%
+  mkfs.btrfs /dev/${DISK}1
+done
+
+# Mount all BTRFS partitions
+mkdir /mnt/btrfs
+mount -t btrfs $(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$" | awk '{print "/dev/"$1"1"}') /mnt/btrfs
+
 # CHROOT BASE !!!
 
 # Install the base system
@@ -78,26 +98,6 @@ locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 echo "KEYMAP=us" > /etc/vconsole.conf
 echo "FONT=Lat2-Terminus16" >> /etc/vconsole.conf
-
-# DISK !!!
-
-# Retrieve the name of the installation disk
-INSTALL_DISK=$(lsblk -dpno NAME $(mount | awk '$3 == "/" {print $1}') | head -n1)
-
-# List available disks and retrieve the names of all disks except the installation disk
-ALL_DISKS=$(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$")
-
-# Partition and format all disks except the installation disk
-for DISK in $ALL_DISKS
-do
-  parted -s /dev/$DISK mklabel gpt
-  parted -s /dev/$DISK mkpart primary btrfs 0% 100%
-  mkfs.btrfs /dev/${DISK}1
-done
-
-# Mount all BTRFS partitions
-mkdir /mnt/btrfs
-mount -t btrfs $(lsblk -dpno NAME | grep -v "^${INSTALL_DISK}$" | awk '{print "/dev/"$1"1"}') /mnt/btrfs
 
 # INSTALL !!!
 
