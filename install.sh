@@ -10,9 +10,9 @@
 # 
 #========================================================================================
 #
-#          FILE:  arch_install
+#          FILE:  install.sh
 #
-#         USAGE:  curl -s https://raw.githubusercontent.com/henrydenhengst/myarch/main/arch_install | bash
+#         USAGE:  curl -s https://raw.githubusercontent.com/henrydenhengst/myarch/main/install.sh | bash
 #
 #   DESCRIPTION:  Arch Linux Unattended Install
 #
