@@ -38,8 +38,6 @@ sudo /path/to/appimageupdatetool -ai >> "$APPIMAGE_LOG" 2>&1
 # Log completion message
 echo "Auto-update script completed successfully at $(date)" >> "$UPDATE_LOG"
 
-#!/bin/bash
-
 # Make sure Flatpak and Snap are installed
 if ! command -v flatpak &> /dev/null
 then
@@ -102,12 +100,15 @@ else
   echo "Failed to install upgrades to the Arch Linux package base and base-devel group."
 fi
 
-# Check for orphaned packages and remove them
-echo "Checking for orphaned packages and removing them..."
-if sudo pacman -Qdtq | sudo pacman -Rs - --noconfirm; then
+# Check for orphaned packages
+orphans=$(sudo pacman -Qdtq)
+
+if [[ -n "$orphans" ]]; then
+  echo "Orphaned packages found. Removing them..."
+  sudo pacman -Rs $orphans --noconfirm
   echo "Orphaned packages removed successfully."
 else
-  echo "Failed to remove orphaned packages."
+  echo "No orphaned packages found."
 fi
 
 # Remove leftover files from previous installations/upgrades
