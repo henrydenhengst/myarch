@@ -38,7 +38,7 @@ DEFAULT_USER="gebruiker"
 read -rp "Gebruikersnaam [$DEFAULT_USER]: " USER
 USER=${USER:-$DEFAULT_USER}
 
-DEFAULT_PASS="henry12345"
+DEFAULT_PASS="gebruiker12345"
 read -rsp "Wachtwoord [$DEFAULT_PASS]: " PASS
 echo
 PASS=${PASS:-$DEFAULT_PASS}
