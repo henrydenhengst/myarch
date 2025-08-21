@@ -91,7 +91,7 @@ Voor laptops worden extra power- en batterijtools geïnstalleerd.
 
 ---
 
-Aanpassen
+# Aanpassen
 
 Default username en wachtwoord kun je wijzigen door de variabelen bovenaan het script aan te passen.
 
