@@ -2,7 +2,6 @@
 
 Een volledig geautomatiseerd Arch Linux installatie script met Cinnamon desktop, SDDM, volledige disk encryptie en extra apps. Geschikt voor laptops en desktops. Het script detecteert automatisch hardware, configureert drivers en services, en vraagt alleen om minimale input (doelschijf, gebruikersnaam, wachtwoord en hostname).
 
-
 ---
 
 # Kenmerken
@@ -55,8 +54,8 @@ root toegang in live omgeving
 
 4. Start het script:
 
-
 chmod +x arch_installer.sh
+
 sudo ./arch_installer.sh
 
 5. Volg de prompts:
