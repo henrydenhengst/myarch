@@ -1,191 +1,202 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
+clear
 
-# === CONFIG ===
-USER="henry"
-PASS="henry12345"
-DISK="/dev/sda"   # ⚠️ pas dit aan!
-HOSTNAME=""
-ROLE=""
-UCODE=""
-GPU_PKGS=""
-BOOT_MODE=""
-TARGET=""
-CRYPT_PART=""
-TIMEZONE="Europe/Amsterdam"
-LOCALE="en_US.UTF-8"
+# ==========================
+# Arch Linux Turnkey Installer
+# ==========================
 
-echo "==> Detecting hardware..."
+echo "==================================="
+echo "   WELKOM BIJ DE ARCH INSTALLER    "
+echo "==================================="
 
-# --- CPU microcode
-if grep -qi intel /proc/cpuinfo; then
-  UCODE="intel-ucode"
-elif grep -qi amd /proc/cpuinfo; then
-  UCODE="amd-ucode"
-fi
-
-# --- GPU
-if lspci | grep -qi nvidia; then
-  GPU_PKGS="nvidia nvidia-utils nvidia-settings"
-elif lspci | grep -qi amd; then
-  GPU_PKGS="xf86-video-amdgpu"
-elif lspci | grep -qi intel; then
-  GPU_PKGS="mesa xf86-video-intel"
-fi
-
-# --- Laptop vs desktop
+# --------------------------
+# Detecteer hardware
+# --------------------------
+echo "[+] Detecteer hardware..."
+CPU_VENDOR=$(lscpu | grep "Vendor ID" | awk '{print $3}')
+GPU_VENDOR=$(lspci | grep -i "vga" | head -n1 | awk -F ': ' '{print $2}')
 if dmidecode -s system-product-name 2>/dev/null | grep -qi laptop; then
-  ROLE="laptop"
-  HOSTNAME="laptop.netwerk.lan"
+    SYSTEM_TYPE="laptop"
 else
-  ROLE="desktop"
-  HOSTNAME="desktop.netwerk.lan"
+    SYSTEM_TYPE="desktop"
 fi
+echo "    CPU: $CPU_VENDOR, GPU: $GPU_VENDOR, Type: $SYSTEM_TYPE"
 
-# --- Boot mode
-if [ -d /sys/firmware/efi ]; then
-  BOOT_MODE="uefi"
+# --------------------------
+# Doelschijf prompt
+# --------------------------
+DEFAULT_DISK=$(lsblk -dpno NAME,ROTA,SIZE,MODEL | grep -v "USB" | grep -v "loop" | head -n1 | awk '{print $1}')
+read -rp "Doelschijf [$DEFAULT_DISK]: " DISK
+DISK=${DISK:-$DEFAULT_DISK}
+echo "[+] Gebruik: $DISK"
+
+# --------------------------
+# Gebruiker prompt
+# --------------------------
+DEFAULT_USER="gebruiker"
+read -rp "Gebruikersnaam [$DEFAULT_USER]: " USER
+USER=${USER:-$DEFAULT_USER}
+
+DEFAULT_PASS="henry12345"
+read -rsp "Wachtwoord [$DEFAULT_PASS]: " PASS
+echo
+PASS=${PASS:-$DEFAULT_PASS}
+
+# --------------------------
+# Hostname prompt
+# --------------------------
+if [[ "$SYSTEM_TYPE" == "laptop" ]]; then
+    DEFAULT_HOSTNAME="laptop.netwerk.lan"
 else
-  BOOT_MODE="bios"
+    DEFAULT_HOSTNAME="desktop.netwerk.lan"
 fi
+read -rp "Hostname [$DEFAULT_HOSTNAME]: " HOSTNAME
+HOSTNAME=${HOSTNAME:-$DEFAULT_HOSTNAME}
+echo "[+] Hostname: $HOSTNAME"
 
-echo "==> Wiping and partitioning disk $DISK..."
-sgdisk --zap-all "$DISK"
-
-if [ "$BOOT_MODE" = "uefi" ]; then
-  parted -s "$DISK" mklabel gpt \
-    mkpart ESP fat32 1MiB 512MiB set 1 boot on \
-    mkpart cryptroot 512MiB 100%
-  ESP_PART="${DISK}1"
-  CRYPT_PART="${DISK}2"
-else
-  parted -s "$DISK" mklabel msdos \
-    mkpart primary 1MiB 100% set 1 boot on
-  CRYPT_PART="${DISK}1"
-fi
-
-echo "==> Setting up encryption..."
-echo -n "$PASS" | cryptsetup luksFormat "$CRYPT_PART" -
-echo -n "$PASS" | cryptsetup open "$CRYPT_PART" cryptroot -
-
-# --- Filesystem
-if lsblk -dno rota "$DISK" | grep -q 0; then
-  echo "==> SSD/NVMe detected, using Btrfs..."
-  mkfs.btrfs /dev/mapper/cryptroot
-  mount /dev/mapper/cryptroot /mnt
-  btrfs subvolume create /mnt/@
-  btrfs subvolume create /mnt/@home
-  umount /mnt
-  mount -o subvol=@ /dev/mapper/cryptroot /mnt
-  mkdir /mnt/home
-  mount -o subvol=@home /dev/mapper/cryptroot /mnt/home
-else
-  echo "==> HDD detected, using ext4..."
-  mkfs.ext4 /dev/mapper/cryptroot
-  mount /dev/mapper/cryptroot /mnt
-fi
-
-if [ "$BOOT_MODE" = "uefi" ]; then
-  mkfs.fat -F32 "$ESP_PART"
-  mkdir /mnt/boot
-  mount "$ESP_PART" /mnt/boot
-fi
-
-echo "==> Base install..."
-pacstrap -K /mnt base linux linux-lts linux-firmware $UCODE $GPU_PKGS \
-  networkmanager sudo vim nano reflector \
-  cinnamon sddm xorg firefox \
-  terminator kitty \
-  ufw neofetch htop btop wget curl unzip zip p7zip \
-  pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber \
-  bluez bluez-utils cups system-config-printer sane-airscan \
-  ttf-dejavu ttf-liberation noto-fonts noto-fonts-emoji ttf-fira-code \
-  zram-generator timeshift
-
-if [ "$ROLE" = "laptop" ]; then
-  pacstrap -K /mnt tlp powertop upower acpid brightnessctl
-else
-  pacstrap -K /mnt base-devel git \
-    virt-manager qemu libvirt dnsmasq vde2 bridge-utils openbsd-netcat
-fi
-
-echo "==> Generating fstab..."
-genfstab -U /mnt >> /mnt/etc/fstab
-
-# --- Post-install script inside chroot
-cat > /mnt/root/postinstall.sh << 'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-
-USER="henry"
-PASS="henry12345"
-HOSTNAME="$HOSTNAME"
-ROLE="$ROLE"
-BOOT_MODE="$BOOT_MODE"
-
-echo "==> Setting timezone and locale..."
+# --------------------------
+# Tijdzone & locale
+# --------------------------
 ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
 hwclock --systohc
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo $HOSTNAME > /etc/hostname
 
-echo "==> Setting hostname..."
+# --------------------------
+# Partitionering & encryptie
+# --------------------------
+echo "[+] Partitioneer en encrypt de schijf..."
+sgdisk -Z $DISK
+sgdisk -n1:0:+512M -t1:ef00 -c1:"EFI" $DISK
+sgdisk -n2:0:0 -t2:8300 -c2:"Linux" $DISK
+
+EFI_PART="${DISK}1"
+ROOT_PART="${DISK}2"
+
+# Encrypt root
+echo -n "$PASS" | cryptsetup luksFormat $ROOT_PART -
+echo -n "$PASS" | cryptsetup open $ROOT_PART cryptroot -
+
+mkfs.fat -F32 $EFI_PART
+mkfs.btrfs /dev/mapper/cryptroot -f
+
+mount /dev/mapper/cryptroot /mnt
+mkdir -p /mnt/boot
+mount $EFI_PART /mnt/boot
+
+# --------------------------
+# Base installatie
+# --------------------------
+echo "[+] Installeer base system..."
+pacstrap /mnt base linux linux-firmware vim sudo bash-completion networkmanager
+
+# --------------------------
+# Fstab
+# --------------------------
+genfstab -U /mnt >> /mnt/etc/fstab
+
+# --------------------------
+# Chroot setup
+# --------------------------
+arch-chroot /mnt /bin/bash <<EOF
+set -e
+
+# --------------------------
+# Time & locale inside chroot
+# --------------------------
+ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
+hwclock --systohc
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
 echo "$HOSTNAME" > /etc/hostname
 
-echo "==> Initramfs..."
-sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect keyboard keymap consolefont modconf block encrypt filesystems fsck)/' /etc/mkinitcpio.conf
-mkinitcpio -P
-
-echo "==> Setting root password lock and creating user..."
-echo "root:!" | chpasswd -e
-useradd -m -G wheel "$USER"
+# --------------------------
+# Users
+# --------------------------
+useradd -m -G wheel -s /bin/bash $USER
 echo "$USER:$PASS" | chpasswd
-echo "%wheel ALL=(ALL:ALL) ALL" > /etc/sudoers.d/00_wheel
+echo "root:$PASS" | chpasswd
+passwd -l root
 
-echo "==> Bootloader..."
-if [ "$BOOT_MODE" = "uefi" ]; then
-  bootctl --path=/boot install
-  UUID=$(blkid -s UUID -o value $CRYPT_PART)
-  cat > /boot/loader/entries/arch.conf <<EOL
+# --------------------------
+# Sudo
+# --------------------------
+pacman -S --noconfirm sudo
+sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+
+# --------------------------
+# Bootloader
+# --------------------------
+bootctl --path=/boot install
+cat <<EOL > /boot/loader/loader.conf
+default arch
+timeout 3
+EOL
+
+ROOT_UUID=$(blkid -s UUID -o value $ROOT_PART)
+cat <<EOL > /boot/loader/entries/arch.conf
 title   Arch Linux
 linux   /vmlinuz-linux
-initrd  /$UCODE.img
 initrd  /initramfs-linux.img
-options cryptdevice=UUID=$UUID:cryptroot root=/dev/mapper/cryptroot rw
+options cryptdevice=UUID=$ROOT_UUID:cryptroot root=/dev/mapper/cryptroot rw
 EOL
-  cat > /boot/loader/entries/arch-lts.conf <<EOL
-title   Arch Linux LTS
-linux   /vmlinuz-linux-lts
-initrd  /$UCODE.img
-initrd  /initramfs-linux-lts.img
-options cryptdevice=UUID=$UUID:cryptroot root=/dev/mapper/cryptroot rw
-EOL
-else
-  pacman -S --noconfirm grub
-  grub-install --target=i386-pc $DISK
-  grub-mkconfig -o /boot/grub/grub.cfg
-fi
 
-echo "==> Enable services..."
-systemctl enable NetworkManager
+# --------------------------
+# Desktop environment
+# --------------------------
+pacman -S --noconfirm cinnamon sddm xorg xorg-xinit
 systemctl enable sddm
-systemctl enable ufw
-systemctl enable systemd-timesyncd
-systemctl enable cups
-systemctl enable bluetooth
+systemctl enable NetworkManager
 
-if [ "$ROLE" = "laptop" ]; then
-  systemctl enable tlp
-  systemctl mask systemd-rfkill.service systemd-rfkill.socket || true
-  systemctl enable acpid
-else
-  systemctl enable libvirtd
-  systemctl enable virtlogd
+# --------------------------
+# Hardware drivers
+# --------------------------
+if [[ "$GPU_VENDOR" == *NVIDIA* ]]; then
+    pacman -S --noconfirm nvidia nvidia-utils nvidia-settings
+elif [[ "$GPU_VENDOR" == *AMD* ]]; then
+    pacman -S --noconfirm xf86-video-amdgpu
+elif [[ "$GPU_VENDOR" == *Intel* ]]; then
+    pacman -S --noconfirm mesa xf86-video-intel
 fi
 
-echo "==> Done! Reboot after exit."
+# --------------------------
+# Laptop specific services
+# --------------------------
+if [[ "$SYSTEM_TYPE" == "laptop" ]]; then
+    pacman -S --noconfirm tlp acpi acpid powertop upower
+    systemctl enable tlp
+    systemctl enable acpid
+fi
+
+# --------------------------
+# Desktop specific services
+# --------------------------
+if [[ "$SYSTEM_TYPE" == "desktop" ]]; then
+    pacman -S --noconfirm qemu libvirt virt-manager dnsmasq bridge-utils
+    systemctl enable libvirtd
+fi
+
+# --------------------------
+# Extra apps
+# --------------------------
+pacman -S --noconfirm firefox terminator kitty neofetch btop timeshift pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber bluez bluez-utils cups
+
+# --------------------------
+# Firewall
+# --------------------------
+pacman -S --noconfirm ufw
+systemctl enable ufw
+ufw enable
+
 EOF
 
-chmod +x /mnt/root/postinstall.sh
-arch-chroot /mnt /root/postinstall.sh
+# --------------------------
+# Unmount & reboot
+# --------------------------
+umount -R /mnt
+cryptsetup close cryptroot
+
+echo "[+] Installatie voltooid! Herstart nu je computer."
