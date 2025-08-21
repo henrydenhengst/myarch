@@ -1,99 +1,107 @@
-# myarch
+Zeker! Hier is een duidelijke en gestructureerde README voor jouw Arch Linux installer script:
+
+
+---
+
 Arch Linux Turnkey Installer
 
-⚠️ Belangrijk
+Een volledig geautomatiseerd Arch Linux installatie script met Cinnamon desktop, SDDM, volledige disk encryptie en extra apps. Geschikt voor laptops en desktops. Het script detecteert automatisch hardware, configureert drivers en services, en vraagt alleen om minimale input (doelschijf, gebruikersnaam, wachtwoord en hostname).
 
-Dit script wist je hele doelschijf en installeert Arch volledig automatisch.
-
-Controleer DISK variabele in het script (/dev/sda standaard).
-
-Script is bedoeld om vanuit de Arch ISO live omgeving te draaien.
 
 ---
 
-📦 Inhoud
+Kenmerken
 
-Volledige disk encryptie (LUKS2).
+Detecteert hardware (CPU, GPU, laptop/desktop)
 
-Detectie hardware: CPU, GPU, laptop vs desktop.
+Volledige disk encryptie met LUKS2 en Btrfs root
 
-Installatie van Cinnamon + SDDM.
+Partitionering met EFI bootpartitie
 
-Standaard apps: Firefox, Terminator, Kitty, Pipewire, Bluez, Timeshift, neofetch, en meer.
+Cinnamon Desktop Environment + SDDM
 
-Laptop-specifieke services (TLP, ACPI).
+Gebruiker met sudo, root-account gelocked
 
-Desktop-specifieke services (Libvirt, QEMU).
+Laptop-specifieke services (TLP, ACPI, powertop)
 
-Root-account gelocked, gebruiker henry met sudo.
+Desktop-specifieke services (QEMU, libvirt)
 
----
+Extra apps: Firefox, Terminator, Kitty, Neofetch, Btop, Timeshift, Pipewire, Bluetooth, printing
 
-🖥️ Voorbereiding
+Firewall ingeschakeld met UFW
 
-1. Download de Arch ISO en boot de computer.
+Automatische locale en tijdzone configuratie
 
-
-2. Open een terminal in de live omgeving.
-
-
-3. Zorg dat de computer internet heeft (ping archlinux.org testen).
-
-
-4. Kopieer het script naar de live omgeving, bijvoorbeeld:
-
-curl -O https://mijnserver/arch-install.sh
-chmod +x arch-install.sh
+Hostname automatisch ingesteld afhankelijk van type systeem
 
 ---
 
-🚀 Script uitvoeren
+Vereisten
 
-sudo ./arch-install.sh
+Arch Linux ISO, opgestart in live omgeving
 
-Het script detecteert hardware, partitioneert de schijf, zet encryptie op, installeert het systeem en configureert services.
+Internetverbinding
 
-Hostname, gebruiker en wachtwoord zijn automatisch ingesteld:
+Minimaal één interne schijf voor installatie
 
-Laptop → laptop.netwerk.lan
-
-Desktop → desktop.netwerk.lan
-
-Gebruiker: henry
-
-Wachtwoord: henry12345
+root toegang in live omgeving
 
 ---
 
-🔧 Na installatie
+Gebruik
 
-1. Herstart de computer:
-
-reboot
+1. Boot de computer vanaf de Arch Linux ISO.
 
 
-2. Verwijder de ISO/USB media.
+2. Zorg dat het systeem verbonden is met het internet.
 
 
-3. Bij de eerste boot wordt gevraagd om de LUKS-passphrase (henry12345).
+3. Mount het script op de live omgeving (bijv. via USB of wget/curl).
+
+4. Start het script:
 
 
-4. Cinnamon + SDDM start automatisch.
+chmod +x arch_installer.sh
+sudo ./arch_installer.sh
+
+5. Volg de prompts:
+
+Doelschijf (default: eerste interne schijf)
+
+Gebruikersnaam (default: gebruiker)
+
+Wachtwoord (default: henry12345)
+
+Hostname (default: laptop/netwerk afhankelijk)
 
 
-5. Alle services (NetworkManager, UFW, Pipewire, Bluetooth, TLP/acpid/libvirtd) zijn geactiveerd.
+6. Het script voert automatisch de rest uit: partitioneren, encryptie, base install, desktop environment, drivers, extra apps, firewall, en systeemdiensten.
+
+
+7. Na voltooiing, unmount en reboot:
+
+
+[+] Installatie voltooid! Herstart nu je computer.
 
 ---
 
-📌 Tips
+Tips
 
-Controleer na installatie de GPU-driver en display manager.
+Zorg dat je een back-up hebt van alle gegevens op de doelschijf, omdat deze volledig wordt gewist.
 
-Pas eventuele extra apps aan via pacman.
+De installatie vereist internet, zorg dat NetworkManager actief is in de live omgeving.
 
-Voor snapshots gebruik timeshift.
+Het script detecteert hardware automatisch en installeert relevante drivers voor Intel, AMD en NVIDIA GPU’s.
+
+Voor laptops worden extra power- en batterijtools geïnstalleerd.
 
 ---
 
+Aanpassen
 
+Default username en wachtwoord kun je wijzigen door de variabelen bovenaan het script aan te passen.
+
+Extra applicaties kunnen worden toegevoegd in het gedeelte # Extra apps in het script.
+
+Tijdzone en locale zijn momenteel ingesteld op Europe/Amsterdam en en_US.UTF-8, deze kunnen aangepast worden in het script.
 
