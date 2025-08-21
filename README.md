@@ -1,7 +1,4 @@
-Zeker! Hier is een duidelijke en gestructureerde README voor jouw Arch Linux installer script:
-
-
----
+# myarch
 
 Arch Linux Turnkey Installer
 
