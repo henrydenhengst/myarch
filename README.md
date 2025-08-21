@@ -1,13 +1,11 @@
-# myarch
-
-Arch Linux Turnkey Installer
+# Arch Linux Turnkey Installer
 
 Een volledig geautomatiseerd Arch Linux installatie script met Cinnamon desktop, SDDM, volledige disk encryptie en extra apps. Geschikt voor laptops en desktops. Het script detecteert automatisch hardware, configureert drivers en services, en vraagt alleen om minimale input (doelschijf, gebruikersnaam, wachtwoord en hostname).
 
 
 ---
 
-Kenmerken
+# Kenmerken
 
 Detecteert hardware (CPU, GPU, laptop/desktop)
 
@@ -33,7 +31,7 @@ Hostname automatisch ingesteld afhankelijk van type systeem
 
 ---
 
-Vereisten
+# Vereisten
 
 Arch Linux ISO, opgestart in live omgeving
 
@@ -45,7 +43,7 @@ root toegang in live omgeving
 
 ---
 
-Gebruik
+# Gebruik
 
 1. Boot de computer vanaf de Arch Linux ISO.
 
@@ -67,7 +65,7 @@ Doelschijf (default: eerste interne schijf)
 
 Gebruikersnaam (default: gebruiker)
 
-Wachtwoord (default: henry12345)
+Wachtwoord (default: gebruiker12345)
 
 Hostname (default: laptop/netwerk afhankelijk)
 
@@ -82,7 +80,7 @@ Hostname (default: laptop/netwerk afhankelijk)
 
 ---
 
-Tips
+# Tips
 
 Zorg dat je een back-up hebt van alle gegevens op de doelschijf, omdat deze volledig wordt gewist.
 
